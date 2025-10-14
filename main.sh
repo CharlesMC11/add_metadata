@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/zsh -f
+#!/usr/bin/env /zsh -f
 # A script for renaming screenshots and adding certain metadata
 
 readonly SCRIPT_NAME=${0:t2:r}

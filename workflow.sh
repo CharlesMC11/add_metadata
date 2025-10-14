@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/zsh -f
+#!/usr/bin/env zsh -f
 # A script for preparing `add_metadata/main.sh`. It will be sourced by a
 # Folder Action
 

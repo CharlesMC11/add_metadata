@@ -13,6 +13,8 @@ readonly HOMEBREW_PREFIX=/opt/homebrew
 readonly EXECUTABLE_DIR=${HOME}/.local/bin/tag_and_rename
 readonly TAG_FILES_DIR=${HOME}/.local/share/exiftool
 
+float -r EXECUTION_DELAY=0.5
+
 export -Ua path
 path=("$EXECUTABLE_DIR" "${HOMEBREW_PREFIX}/bin" "${HOMEBREW_PREFIX}/opt/libarchive/bin" ${==path})
 
@@ -28,6 +30,8 @@ fi
 # executes the rest of the script body.
 mkfifo "$PIPE" && trap 'rm "$PIPE"' EXIT
 
-main --verbose --input "${SCREENSHOTS_DIR}/.tmp" --output "$SCREENSHOTS_DIR"\
+sleep $EXECUTION_DELAY # Give time for all screenshots to be written to disk
+
+processor.sh --verbose --input "${SCREENSHOTS_DIR}/.tmp" --output "$SCREENSHOTS_DIR"\
     --tag "${TAG_FILES_DIR}/charlesmc.args"\
     --tag "${TAG_FILES_DIR}/screenshot.args"

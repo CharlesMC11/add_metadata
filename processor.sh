@@ -41,7 +41,8 @@ error_if_not_dir () {
 
 ################################################################################
 
-output_dir=$PWD
+integer is_verbose=0
+output_dir=$(pwd)
 timezone=$(date +%z)
 software=$(sw_vers --productVersion)
 hardware=$(system_profiler SPHardwareDataType | sed -En 's/^.*Model Name: //p')
@@ -50,29 +51,27 @@ while (($#)); do
     case $1 in
         -h  | --help    ) show_usage; exit
         ;;
-        -v  | --verbose ) integer -r is_verbose=1
+        -v  | --verbose ) is_verbose=1; shift
         ;;
-        -i  | --input   ) error_if_not_dir Input $2; cd "$2"; shift
+        -i  | --input   ) error_if_not_dir Input $2; cd "$2"; shift 2
         ;;
-        -o  | --output  ) error_if_not_dir Output $2; output_dir=$2; shift
+        -o  | --output  ) error_if_not_dir Output $2; output_dir=$2; shift 2
         ;;
-        -tz | --timezone) timezone=$2; shift
+        -tz | --timezone) timezone=$2; shift 2
         ;;
-        -sw | --software) software=$2; shift
+        -sw | --software) software=$2; shift 2
         ;;
-        -hw | --hardware) hardware=$2; shift
+        -hw | --hardware) hardware=$2; shift 2
         ;;
-        -tg | --tag     ) tag_files+="-@ $2"; shift
+        -tg | --tag     ) tag_files+="-@ $2"; shift 2
         ;;
         -*  | --*       ) error_on_invalid_option $1
         ;;
         *               ) error_on_invalid_option $1
         ;;
     esac
-    shift
 done
 
-setopt EXTENDED_GLOB
 readonly orig_filename_pattern='*<19-21>#<-99>[^[:digit:]]#<-12>[^[:digit:]]#<-31>[^[:digit:]]#<-23>[^[:digit:]]#<-59>[^[:digit:]]#<-59>*.*(.N)'
 declare -Ua screenshot_files
 readonly screenshot_files=(${~orig_filename_pattern})

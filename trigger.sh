@@ -6,11 +6,11 @@ setopt ERR_EXIT
 setopt NO_UNSET
 
 readonly SCREENSHOTS_DIR=${HOME}/MyFiles/Pictures/Screenshots
-readonly PIPE=${SCREENSHOTS_DIR}/add_metadata
+readonly PIPE=${SCREENSHOTS_DIR}/tag_and_rename.pipe
 
 readonly HOMEBREW_PREFIX=/opt/homebrew
 
-readonly EXECUTABLE_DIR=${HOME}/.local/bin/process_screenshots
+readonly EXECUTABLE_DIR=${HOME}/.local/bin/tag_and_rename
 readonly TAG_FILES_DIR=${HOME}/.local/share/exiftool
 
 export -Ua path

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>${USER}.screenshot_tagger</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>${HOME}/.local/bin/screenshot-tagger/screenshot-watcher</string>
+    </array>
+
+    <key>WatchPaths</key>
+    <array>
+        <string>${HOME}/MyFiles/Pictures/Screenshots/.tmp</string>
+    </array>
+</dict>
+</plist>

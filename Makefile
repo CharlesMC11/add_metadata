@@ -2,8 +2,11 @@ SHELL         := zsh
 SCRIPT_NAME   := shot-tagger
 BIN_DIR       := ~/.local/bin/$(SCRIPT_NAME)
 
-SRC_PROCESSOR := shot-processor.zsh
-SRC_AGENT     := shot-agent.zsh
+SRC_ENGINE          := metadata-engine
+SRC_WATCHER         := screenshot-watcher
+PLIST_NAME_BASE     := screenshot_tagger.plist
+PLIST_NAME_TEMPLATE := $(PLIST_NAME_BASE).template
+PLIST_NAME          := $(USER).$(PLIST_NAME_BASE)
 
 INSTALL       := install -vl as
 

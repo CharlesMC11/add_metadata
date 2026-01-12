@@ -1,28 +1,43 @@
-SHELL       := zsh
+SHELL         := zsh
+SCRIPT_NAME   := shot-tagger
+BIN_DIR       := ~/.local/bin/$(SCRIPT_NAME)
 
-SCRIPT_NAME := add_metadata
-BIN_PATH    := ~/.local/bin/$(SCRIPT_NAME)
+SRC_PROCESSOR := shot-processor.zsh
+SRC_AGENT     := shot-agent.zsh
 
-symlink     := install -v -l as
+INSTALL       := install -vl as
 
-all: main workflow
+.PHONY: all install compile load unload clean
 
-main: main.sh.zwc dir
-	$(symlink) $@.sh $(BIN_PATH)/$@
-	$(symlink) $< $(BIN_PATH)/$@.zwc
-	chmod +x $(BIN_PATH)/$@
+all: compile install
 
-workflow: workflow.workflow workflow.sh.zwc dir
-	$(symlink) $@.$@ ~/Library/Workflows/Applications/Folder\ Actions/$(SCRIPT_NAME).$@
+compile: $(SRC_PROCESSOR).zwc $(SRC_AGENT).zwc
 
-	$(symlink) $@.sh     $(BIN_PATH)/$@.sh
-	$(symlink) $@.sh.zwc $(BIN_PATH)/$@.sh.zwc
-
-%.sh.zwc: %.sh
+%.zwc: %
 	zcompile $<
 
-dir:
-	if   [[ -d $(BIN_PATH) ]]; then exit 0;\
-	elif [[ -e $(BIN_PATH) ]]; then rm $(BIN_PATH);\
-	fi;\
-	mkdir $(BIN_PATH)
+install: compile
+	@echo "Installing to '$(BIN_DIR)'"
+	@if [[ -e $(BIN_DIR) && ! -d $(BIN_DIR) ]]; then\
+		rm $(BIN_DIR);\
+	fi
+	@mkdir -p $(BIN_DIR)
+
+	$(INSTALL) -m 755 $(SRC_PROCESSOR)     $(BIN_DIR)
+	$(INSTALL) -m 755 $(SRC_AGENT)         $(BIN_DIR)
+	$(INSTALL) -m 644 $(SRC_PROCESSOR).zwc $(BIN_DIR)
+	$(INSTALL) -m 644 $(SRC_AGENT).zwc     $(BIN_DIR)
+
+load: me.charlesmc.shot_tagger.plist
+	@echo 'Loading launchd plist...'
+	$(INSTALL) -m 644 $< ~/Library/LaunchAgents/
+	launchctl load -w $<
+
+unload: me.charlesmc.shot_tagger.plist
+	@echo 'Unloading launchd plist...'
+	launchctl unload -w $<
+	rm -f ~/Library/LaunchAgents/$<
+
+clean:
+	@echo 'Removing installed files...'
+	rm -rf $(BIN_DIR) *.zwc

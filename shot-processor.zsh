@@ -1,5 +1,5 @@
 #!/usr/bin/env -S zsh -f
-# A script for renaming screenshots and adding certain metadata
+# A script for renaming and adding metadata to screenshots
 
 setopt ERR_EXIT
 setopt NO_UNSET

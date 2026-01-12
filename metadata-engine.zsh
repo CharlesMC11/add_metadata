@@ -7,6 +7,8 @@ setopt PIPE_FAIL
 setopt EXTENDED_GLOB
 
 readonly SCRIPT_NAME=${0:t}
+readonly FILENAME_FILTER_RE='*<19-21>#<-99>[^[:digit:]]#<-12>[^[:digit:]]#<-31>[^[:digit:]]#<-23>[^[:digit:]]#<-59>[^[:digit:]]#<-59>*.*(.N)'
+readonly NEW_FILENAME_EXTRACTOR_RE='^.*?([1-2][^2-8])?(\d{2})\D?([0-1]\d)\D?([0-3]\d)\D*?([0-2]\d)\D?([0-5]\d)\D?([0-5]\d)(.*?)?\..+?$'
 
 show_usage () {
     echo "usage: ${SCRIPT_NAME}\n\
@@ -41,17 +43,17 @@ error_if_not_dir () {
 
 ################################################################################
 
-integer is_verbose=0
+integer verbose_mode=0
 output_dir=$(pwd)
 timezone=$(date +%z)
 software=$(sw_vers --productVersion)
 hardware=$(system_profiler SPHardwareDataType | sed -En 's/^.*Model Name: //p')
-declare -Ua tag_files
+declare -Ua arg_files
 while (($#)); do
     case $1 in
         -h  | --help    ) show_usage; exit
         ;;
-        -v  | --verbose ) is_verbose=1; shift
+        -v  | --verbose ) verbose_mode=1; shift
         ;;
         -i  | --input   ) error_if_not_dir Input $2; cd "$2"; shift 2
         ;;
@@ -63,7 +65,7 @@ while (($#)); do
         ;;
         -hw | --hardware) hardware=$2; shift 2
         ;;
-        -tg | --tag     ) tag_files+="-@ $2"; shift 2
+        -tg | --tag     ) arg_files+="-@ $2"; shift 2
         ;;
         -*  | --*       ) error_on_invalid_option $1
         ;;
@@ -72,33 +74,31 @@ while (($#)); do
     esac
 done
 
-readonly orig_filename_pattern='*<19-21>#<-99>[^[:digit:]]#<-12>[^[:digit:]]#<-31>[^[:digit:]]#<-23>[^[:digit:]]#<-59>[^[:digit:]]#<-59>*.*(.N)'
-declare -Ua screenshot_files
-readonly screenshot_files=(${~orig_filename_pattern})
-if ((${#screenshot_files} == 0)); then
+declare -Ua pending_screenshots
+readonly pending_screenshots=(${~FILENAME_FILTER_RE})
+if ((${#pending_screenshots} == 0)); then
     echo "No screenshots to process: ${PWD}" 1>&2
     exit 2
 fi
 
 # PERL string replacement patterns that will be used by ExifTool
-readonly re='^.*?([1-2][^2-8])?(\d{2})\D?([0-1]\d)\D?([0-3]\d)\D*?([0-2]\d)\D?([0-5]\d)\D?([0-5]\d)(.*?)?\..+?$'
-readonly orig_str_pattern="Filename;s/${re}"
-readonly new_filename_pattern="\${${orig_str_pattern}/\$2\$3\$4_\$5\$6\$7\$8.%e/}"
-readonly new_datetime_pattern="\${${orig_str_pattern}/\$1\$2-\$3-\$4T\$5:\$6:\$7${timezone}/}"
+readonly filename_replace_pattern="Filename;s/${NEW_FILENAME_EXTRACTOR_RE}"
+readonly new_filename_pattern="\${${filename_replace_pattern}/\$2\$3\$4_\$5\$6\$7\$8.%e/}"
+readonly new_datetime_pattern="\${${filename_replace_pattern}/\$1\$2-\$3-\$4T\$5:\$6:\$7${timezone}/}"
 
 exiftool "-Directory=${output_dir}"          "-Filename<${new_filename_pattern}"\
          "-AllDates<${new_datetime_pattern}" "-OffsetTime*=${timezone}"\
          '-MaxAvailHeight<ImageHeight'       '-MaxAvailWidth<ImageWidth'\
          "-Software=${software}"             "-Model=${hardware}"\
          '-RawFileName<FileName'             '-PreservedFileName<FileName'\
-         -struct          -preserve          ${is_verbose:+'-verbose'}\
-         ${=tag_files}                       --\
-         ${==screenshot_files}               || exit 3
+         -struct          -preserve          ${verbose_mode:+'-verbose'}\
+         ${=arg_files}                       --\
+         ${==pending_screenshots}            || exit 3
 
 if tar -czf "${output_dir}/Screenshots_$(date +%y%m%d_%H%M%S).tar.gz"\
-    ${is_verbose:+'-v'} --options gzip:compression-level=1 \
-    ${==screenshot_files}; then
-    rm ${==screenshot_files}
+    ${verbose_mode:+'-v'} --options gzip:compression-level=1\
+    ${==pending_screenshots}; then
+        rm ${==pending_screenshots}
 else
     echo "Failed to create archive in ${output_dir}" 1>&2
     exit 4

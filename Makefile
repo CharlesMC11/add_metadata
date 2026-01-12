@@ -1,6 +1,6 @@
-SHELL         := zsh
-SCRIPT_NAME   := shot-tagger
-BIN_DIR       := ~/.local/bin/$(SCRIPT_NAME)
+SHELL               := zsh
+SCRIPT_NAME         := screenshot-tagger
+BIN_DIR             := $(HOME)/.local/bin/$(SCRIPT_NAME)
 
 SRC_ENGINE          := metadata-engine
 SRC_WATCHER         := screenshot-watcher
@@ -8,16 +8,11 @@ PLIST_NAME_BASE     := screenshot_tagger.plist
 PLIST_NAME_TEMPLATE := $(PLIST_NAME_BASE).template
 PLIST_NAME          := $(USER).$(PLIST_NAME_BASE)
 
-INSTALL       := install -vl as
+INSTALL             := install -vl h
 
-.PHONY: all install compile load unload clean
+.PHONY: all enable install compile load unload clean
 
-all: compile install
-
-compile: $(SRC_PROCESSOR).zwc $(SRC_AGENT).zwc
-
-%.zwc: %
-	zcompile $<
+all: compile install start
 
 install: compile
 	@echo "Installing to '$(BIN_DIR)'"
@@ -26,21 +21,31 @@ install: compile
 	fi
 	@mkdir -p $(BIN_DIR)
 
-	$(INSTALL) -m 755 $(SRC_PROCESSOR)     $(BIN_DIR)
-	$(INSTALL) -m 755 $(SRC_AGENT)         $(BIN_DIR)
-	$(INSTALL) -m 644 $(SRC_PROCESSOR).zwc $(BIN_DIR)
-	$(INSTALL) -m 644 $(SRC_AGENT).zwc     $(BIN_DIR)
+	@$(INSTALL) -m 755 $(SRC_ENGINE).zsh      $(BIN_DIR)/$(SRC_ENGINE)
+	@$(INSTALL) -m 644 $(SRC_ENGINE).zsh.zwc  $(BIN_DIR)/$(SRC_ENGINE).zwc
 
-load: me.charlesmc.shot_tagger.plist
-	@echo 'Loading launchd plist...'
-	$(INSTALL) -m 644 $< ~/Library/LaunchAgents/
-	launchctl load -w $<
+	@$(INSTALL) -m 755 $(SRC_WATCHER).zsh     $(BIN_DIR)/$(SRC_WATCHER)
+	@$(INSTALL) -m 644 $(SRC_WATCHER).zsh.zwc $(BIN_DIR)/$(SRC_WATCHER).zwc
 
-unload: me.charlesmc.shot_tagger.plist
-	@echo 'Unloading launchd plist...'
-	launchctl unload -w $<
-	rm -f ~/Library/LaunchAgents/$<
+compile: $(SRC_ENGINE).zwc $(SRC_WATCHER).zwc
+
+start: $(PLIST_NAME)
+	@$(INSTALL) -m 644 $(PLIST_NAME) ~/Library/LaunchAgents/
+	launchctl bootstrap gui/$(shell id -u) $(PLIST_NAME)
+
+$(PLIST_NAME): $(PLIST_NAME_TEMPLATE)
+	envsubst < $< > $@
+
+stop: $(PLIST_NAME)
+	launchctl bootout gui/$(shell id -u) $(PLIST_NAME)
+	rm -f ~/Library/LaunchAgents/$(PLIST_NAME)
+
+uninstall: stop
+	@echo "Uninstalling '$(BIN_DIR)'..."
+	rm -rf $(BIN_DIR)
 
 clean:
-	@echo 'Removing installed files...'
-	rm -rf $(BIN_DIR) *.zwc
+	rm -f *.zwc $(PLIST_NAME)
+
+%.zwc: %.zsh
+	zcompile $<

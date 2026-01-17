@@ -36,8 +36,13 @@ trap 'rm -rf "$LOCK"' EXIT
 
 sleep $EXECUTION_DELAY # Give time for all screenshots to be written to disk
 
-tagger-engine --verbose\
+if tagger-engine --verbose\
     --input "${SCREENSHOTS_DIR}/.tmp"\
     --output "$SCREENSHOTS_DIR"\
     --tag "${ARG_FILES_DIR}/charlesmc.args"\
-    --tag "${ARG_FILES_DIR}/screenshot.args"
+    --tag "${ARG_FILES_DIR}/screenshot.args"; then
+    osascript -e 'display notification "Screenshots tagged successfully." with title "Screenshot Tagger" sound name "Glass"'
+else
+    osascript -e 'display notification "An error occurred while tagging screenshots." with title "Screenshot Tagger" sound name "Basso"'
+    exit 2
+fi

@@ -56,7 +56,7 @@ error_if_not_dir () {
 ################################################################################
 
 integer verbose_mode=0
-output_dir=$(pwd)
+output_dir=$PWD
 timezone=$(date +%z)
 software=$(sw_vers --productVersion)
 hardware=$(system_profiler SPHardwareDataType | sed -En 's/^.*Model Name: //p')

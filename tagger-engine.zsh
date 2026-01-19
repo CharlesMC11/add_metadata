@@ -96,15 +96,15 @@ exiftool "-Directory=${output_dir}"          "-Filename<${new_filename_pattern}"
          '-MaxAvailHeight<ImageHeight'       '-MaxAvailWidth<ImageWidth'\
          "-Software=${software}"             "-Model=${model}"\
          '-RawFileName<FileName'             '-PreservedFileName<FileName'\
-         -struct          -preserve          ${verbose_mode:+'-verbose'}\
+         -struct          -preserve          ${verbose_mode:+-verbose}\
          ${=arg_files}                       --\
          ${==pending_screenshots}            || exit 4
 
 local datetime
 strftime -s datetime %Y%m%d_%H%M%S
-readonly archive_name="Screenshots_${datetime}.tar.gz"
-if tar -czf "${output_dir}/${archive_name}" --options gzip:compression-level=1\
-    ${==pending_screenshots}; then
+readonly archive_name="Screenshots_${datetime}.zip"
+if ditto -${verbose_mode:+V}c -k --sequesterRsrc --zlibCompressionLevel 1\
+    ${==pending_screenshots} "${output_dir}/${archive_name}"; then
 
     rm ${==pending_screenshots}
     if (( verbose_mode )); then

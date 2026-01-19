@@ -103,10 +103,14 @@ exiftool "-Directory=${output_dir}"          "-Filename<${new_filename_pattern}"
 local datetime
 strftime -s datetime %Y%m%d_%H%M%S
 readonly archive_name="Screenshots_${datetime}.zip"
-if ditto -${verbose_mode:+V}c -k --sequesterRsrc --zlibCompressionLevel 1\
-    ${==pending_screenshots} "${output_dir}/${archive_name}"; then
 
-    rm ${==pending_screenshots}
+if dir=$(mktemp --directory -t "${USER}") &&\
+    ln ${verbose_mode:+-v} ${==pending_screenshots} "$dir"; then
+    trap 'rm -rf "$dir"' EXIT
+
+    ditto -${verbose_mode:+V}c -k --sequesterRsrc --zlibCompressionLevel 1\
+    "$dir" "${output_dir}/${archive_name}" && rm ${==pending_screenshots}
+
     if (( verbose_mode )); then
         print -- "Created archive: '${output_dir:t}/${archive_name}'"
     fi

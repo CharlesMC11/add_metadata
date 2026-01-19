@@ -1,5 +1,5 @@
 #!/usr/bin/env -S zsh -f
-# A script for preparing `shot-processor.zsh`. It will be called by `launchd`
+# A script for preparing `tagger-engine`. It will be called by `launchd`
 
 setopt ERR_EXIT
 setopt NO_UNSET

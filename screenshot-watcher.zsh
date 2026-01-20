@@ -36,6 +36,7 @@ path=(
 if mkdir -m 000 "$LOCK" 2>/dev/null; then
     trap 'rmdir "$LOCK"' EXIT
 else
+    print -u 2 -- 'Lock exists; exiting...'
     exit 1
 fi
 

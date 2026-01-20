@@ -44,7 +44,7 @@ show_usage () {
 # $2: An input or output directory
 error_if_not_dir () {
     if [[ ! -d $2 ]]; then
-        print -u 2 -- "$1 is not a directory: '$2'"
+        print -u 2 -- "${SCRIPT_NAME}: $1 is not a directory: '$2'"
         show_usage
         exit 2
     fi
@@ -81,9 +81,15 @@ readonly timezone=${opts[--timezone]:-$(strftime %z)}
 local -Ua pending_screenshots
 readonly pending_screenshots=(${~FILENAME_FILTER_RE}.${~FILENAME_SORTING_RE} ${~FILENAME_FILTER_RE}*.${~FILENAME_SORTING_RE})
 if (( ${#pending_screenshots} == 0 )); then
-    print -u 2 -- "No screenshots to process in '${input_dir}/'"
+    print -u 2 -- "${SCRIPT_NAME}: No screenshots to process in '${input_dir}/'"
     exit 3
 fi
+
+local datetime; strftime -s datetime %Y%m%d_%H%M%S
+readonly archive_name="Screenshots_${datetime}.aar"
+aa archive ${opts[--verbose]:+-v} -d "$input_dir" -o "${output_dir}/${archive_name}"\
+    -include-path-list <(print -l -- "${pending_screenshots[@]}") 2>>'aa.log' 1>>'aa.log' &
+integer -r aa_pid=$!
 
 # PERL string replacement patterns that will be used by ExifTool
 readonly replacement_pattern="Filename;s/${DATETIME_EXTRACTOR_RE}"
@@ -97,22 +103,20 @@ exiftool "-Directory=${output_dir}"          "-Filename<${new_filename_pattern}"
          '-RawFileName<FileName'             '-PreservedFileName<FileName'\
          -struct          -preserve          ${opts[--verbose]:+-verbose}\
          "${arg_files[@]}"                   --\
-         "${pending_screenshots[@]}"         || {print -- 'ExifTool failed'; exit 4}
+         "${pending_screenshots[@]}"         2>>'et.log' 1>>'et.log' &
+integer -r et_pid=$!
 
-local datetime; strftime -s datetime %Y%m%d_%H%M%S
-readonly archive_name="Screenshots_${datetime}.aar"
+if ! wait $aa_pid; then
+    print -l -- "${SCRIPT_NAME}: Archiving failed" "$(<'aa.log')"
+    exit 4
+fi
 
-readonly tmpdir="${TMPDIR}${USER}.${SCRIPT_NAME}.${datetime}"
-if mkdir -m 700 "$tmpdir" && cp -f "${pending_screenshots[@]}" "${tmpdir}/"; then
-    trap 'rm -rf "${tmpdir}/"' EXIT
-
-    aa archive ${opts[--verbose]:+-v} -d "${tmpdir}/"\
-     -o "${output_dir}/${archive_name}" && rm -f "${pending_screenshots[@]}"
-
-    if (( ${+opts[--verbose]} )); then
-        print -- "Created archive: '${output_dir:t}/${archive_name}'"
-    fi
-else
-    print -u 2 -- "Failed to create archive: '${output_dir:t}/${archive_name}'"
+if ! wait $et_pid; then
+    print -l -- "${SCRIPT_NAME}: ExifTool failed" "$(<'et.log')"
     exit 5
+fi
+
+rm -f "${pending_screenshots[@]}" *.log
+if (( ${+opts[--verbose]} )); then
+    print -- "${SCRIPT_NAME}: Created archive: '${output_dir:t}/${archive_name}'"
 fi

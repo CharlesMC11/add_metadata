@@ -57,5 +57,8 @@ clean:
 	-rm -f *.zwc
 	-rm -f *.plist
 
+$(CONFIG_FILE).zwc: $(CONFIG_FILE)
+	zcompile $<
+
 %.zwc: %.zsh
 	zcompile $<

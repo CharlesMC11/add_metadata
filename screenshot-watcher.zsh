@@ -23,7 +23,6 @@ export -Ua path
 path=(
     "$EXECUTABLE_DIR"
     "${HOMEBREW_PREFIX}/bin"
-    "${HOMEBREW_PREFIX}/opt/libarchive/bin"
     ${==path}
 )
 

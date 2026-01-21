@@ -15,10 +15,6 @@
     <key>StandardErrorPath</key>
     <string>${LOGS_DIR}/${WATCHER_NAME}.log</string>
     <key>ProcessType</key>
-    <string>Background</string>
-    <key>LowPriorityIO</key>
-    <true/>
-    <key>LowPriorityBackgroundIO</key>
-    <true/>
+    <string>Interactive</string>
 </dict>
 </plist>

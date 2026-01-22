@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>${USER}.screenshot_tagger</string>
+    <string>me.${USER}.screenshot_tagger</string>
     <key>Program</key>
     <string>${BIN_DIR}/${WATCHER_NAME}</string>
+    <key>ThrottleInterval</key>
+    <integer>2</integer>
     <key>WatchPaths</key>
     <array>
         <string>${INPUT_DIR}</string>
@@ -15,10 +17,6 @@
     <key>StandardErrorPath</key>
     <string>${LOGS_DIR}/${WATCHER_NAME}.log</string>
     <key>ProcessType</key>
-    <string>Background</string>
-    <key>LowPriorityIO</key>
-    <true/>
-    <key>LowPriorityBackgroundIO</key>
-    <true/>
+    <string>Interactive</string>
 </dict>
 </plist>

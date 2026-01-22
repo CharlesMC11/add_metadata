@@ -11,7 +11,7 @@ export WATCHER_NAME := screenshot-watcher
 
 PLIST_NAME_BASE     := screenshot_tagger.plist
 PLIST_NAME_TEMPLATE := $(PLIST_NAME_BASE).template
-PLIST_NAME          := $(USER).$(PLIST_NAME_BASE)
+PLIST_NAME          := me.$(USER).$(PLIST_NAME_BASE)
 
 export LOGS_DIR     := $(HOME)/Library/Logs
 
@@ -60,7 +60,9 @@ clean:
 	-rm -f *.plist
 
 $(CONFIG_FILE).zwc: $(CONFIG_FILE)
-	zcompile $<
+	zsh -n $<
+	zcompile -U $<
 
 %.zwc: %.zsh
-	zcompile $<
+	zsh -n $<
+	zcompile -U $<

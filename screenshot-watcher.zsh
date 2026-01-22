@@ -52,8 +52,10 @@ sleep $EXECUTION_DELAY # Give time for all screenshots to be written to disk
 
 source "${EXECUTABLE_DIR}/tagger-engine"
 local engine_output
-engine_output=$(tagger-engine::main --input "$INPUT_DIR" --output "$OUTPUT_DIR"\
-    -@ "${ARG_FILES_DIR}/charlesmc.args" -@ "${ARG_FILES_DIR}/screenshot.args")
+engine_output=$(tagger-engine::main --verbose\
+    --input "$INPUT_DIR" --output "$OUTPUT_DIR"\
+    -@ "${ARG_FILES_DIR}/charlesmc.args" -@ "${ARG_FILES_DIR}/screenshot.args"\
+    2>&1)
 
 integer -r exit_status=$?
 if (( exit_status == 0 )); then

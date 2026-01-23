@@ -134,7 +134,7 @@ tagger-engine::main() {
         return ${EX_SOFTWARE:-70}
     fi
 
-    rm -f "${pending_screenshots[@]}"
+    rm -f "${pending_screenshots[@]}" *.log
     if (( ${+opts[--verbose]} )); then
         print -- "${SCRIPT_NAME}: Created archive: '${output_dir:t}/${archive_name}'"
     fi

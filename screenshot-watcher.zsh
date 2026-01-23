@@ -41,7 +41,7 @@ path=(
 # amount of times. Checking for this lock ensures that only the first instance
 # of the script executes the rest of the script body.
 if mkdir -m 200 "$LOCK_PATH" 2>/dev/null; then
-    trap 'rmdir "$LOCK_PATH"' EXIT
+    trap 'rmdir "$LOCK_PATH"' EXIT INT TERM
     print -- "Created lock in '${LOCK_PATH:h}/'"
 else
     print -u 2 -- "Lock exists in '${LOCK_PATH:h}/'; exiting..."
@@ -52,8 +52,7 @@ sleep $EXECUTION_DELAY # Give time for all screenshots to be written to disk
 
 source "${EXECUTABLE_DIR}/tagger-engine"
 local engine_output
-engine_output=$(tagger-engine::main --verbose\
-    --input "$INPUT_DIR" --output "$OUTPUT_DIR"\
+engine_output=$(tagger-engine::main --verbose --input "$INPUT_DIR" --output "$OUTPUT_DIR"\
     -@ "${ARG_FILES_DIR}/charlesmc.args" -@ "${ARG_FILES_DIR}/screenshot.args"\
     2>&1)
 

@@ -24,7 +24,7 @@ fi
 
 readonly LOCK_PATH="${TMPDIR}${SCRIPT_NAME}.lock"
 
-float -r EXECUTION_DELAY=1
+float -r EXECUTION_DELAY=0.1
 
 readonly HOMEBREW_PREFIX=/opt/homebrew
 

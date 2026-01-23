@@ -13,6 +13,7 @@ setopt NUMERIC_GLOB_SORT
 
 zmodload zsh/datetime
 zmodload zsh/files
+zmodload zsh/mapfile
 zmodload zsh/zutil
 
 readonly DATE_FILTER_RE='<19-21><-9><-9>[^[:digit:]]#<-1><-9>[^[:digit:]]#<-3><-9>'
@@ -78,7 +79,10 @@ tagger-engine::main() {
     readonly timezone=${opts[--timezone]:-$timezone}
 
     local -Ua pending_screenshots
-    readonly pending_screenshots=(${~FILENAME_FILTER_RE}.${~FILENAME_SORTING_RE} ${~FILENAME_FILTER_RE}*.${~FILENAME_SORTING_RE})
+    readonly pending_screenshots=( \
+        ${~FILENAME_FILTER_RE}.${~FILENAME_SORTING_RE} \
+        ${~FILENAME_FILTER_RE}*.${~FILENAME_SORTING_RE}
+    )
     if (( ${#pending_screenshots} == 0 )); then
         print -u 2 -- "${SCRIPT_NAME}: No screenshots to process in '${input_dir}/'"
         return ${EX_DATAERR:-65}
@@ -97,8 +101,10 @@ tagger-engine::main() {
 
     local datetime; strftime -s datetime %Y%m%d_%H%M%S
     readonly archive_name="Screenshots_${datetime}.aar"
-    aa archive ${opts[--verbose]:+-v} -d "$input_dir" -o "${output_dir}/${archive_name}"\
-        -include-path-list <(print -l -- "${pending_screenshots[@]}") 2>>'aa.log' 1>>'aa.log' &
+    aa archive ${opts[--verbose]:+-v} -a lz4 -d "$input_dir" \
+        -o "${output_dir}/${archive_name}"\
+        -include-path-list <(print -l -- "${pending_screenshots[@]}") \
+        2>>aa.log 1>>aa.log &
     integer -r aa_pid=$!
     bg_pids+=($aa_pid)
 
@@ -114,21 +120,21 @@ tagger-engine::main() {
             '-RawFileName<FileName'             '-PreservedFileName<FileName'\
             -struct          -preserve          ${opts[--verbose]:+-verbose}\
             "${arg_files[@]}"                   --\
-            "${pending_screenshots[@]}"         2>>'et.log' 1>>'et.log' &
+            "${pending_screenshots[@]}"         2>>exiftool.log 1>>exiftool.log &
     integer -r et_pid=$!
     bg_pids+=($et_pid)
 
     if ! wait $aa_pid; then
-        print -l -u 2 -- "${SCRIPT_NAME}: Archiving failed" "$(<'aa.log')"
+        print -l -u 2 -- "${SCRIPT_NAME}: Archiving failed" "$mapfile[aa.log]"
         return ${EX_CANTCREAT:-70}
     fi
 
     if ! wait $et_pid; then
-        print -l -u 2 -- "${SCRIPT_NAME}: ExifTool failed" "$(<'et.log')"
+        print -l -u 2 -- "${SCRIPT_NAME}: ExifTool failed" "$mapfile[et.log]"
         return ${EX_SOFTWARE:-70}
     fi
 
-    rm -f "${pending_screenshots[@]}"
+    rm -f "${pending_screenshots[@]}" *.log
     if (( ${+opts[--verbose]} )); then
         print -- "${SCRIPT_NAME}: Created archive: '${output_dir:t}/${archive_name}'"
     fi

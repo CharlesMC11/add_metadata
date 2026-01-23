@@ -10,7 +10,7 @@
         <string>${HOMEBREW_PREFIX}/bin/zsh</string>
         <string>-f</string>
         <string>${BIN_DIR}/${WATCHER_NAME}</string>
-    <array>
+    </array>
     <key>ThrottleInterval</key>
     <integer>$THROTTLE_INTERVAL</integer>
 

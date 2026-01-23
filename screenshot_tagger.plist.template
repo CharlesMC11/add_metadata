@@ -11,25 +11,6 @@
         <string>-f</string>
         <string>${BIN_DIR}/${WATCHER_NAME}</string>
     </array>
-    <key>ThrottleInterval</key>
-    <integer>$THROTTLE_INTERVAL</integer>
-
-    <key>WatchPaths</key>
-    <array>
-        <string>$INPUT_DIR</string>
-    </array>
-
-    <key>StandardOutPath</key>
-    <string>$LOG_FILE</string>
-    <key>StandardErrorPath</key>
-    <string>$LOG_FILE</string>
-
-    <key>ProcessType</key>
-    <string>Interactive</string>
-
-    <key>LowPriorityIO</key>
-    <false/>
-
     <key>EnvironmentVariables</key>
     <dict>
         <key>LC_ALL</key>
@@ -40,8 +21,6 @@
         <key>TMPDIR</key>
         <string>$TMPDIR</string>
 
-        <key>HOMEBREW_PREFIX</key>
-        <string>$HOMEBREW_PREFIX</string>
         <key>BIN_DIR</key>
         <string>$BIN_DIR</string>
         <key>ARG_FILES_DIR</key>
@@ -60,5 +39,25 @@
         <key>HW_MODEL</key>
         <string>$HW_MODEL</string>
     </dict>
+    <key>ThrottleInterval</key>
+    <integer>$THROTTLE_INTERVAL</integer>
+
+    <key>WatchPaths</key>
+    <array>
+        <string>$INPUT_DIR</string>
+    </array>
+
+    <key>StandardOutPath</key>
+    <string>$LOG_FILE</string>
+    <key>StandardErrorPath</key>
+    <string>$LOG_FILE</string>
+
+    <key>ProcessType</key>
+    <string>Interactive</string>
+
+    <key>LowPriorityIO</key>
+    <false/>
+    <key>LowPriorityBackgroundIO</key>
+    <false/>
 </dict>
 </plist>

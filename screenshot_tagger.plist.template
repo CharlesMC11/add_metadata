@@ -4,19 +4,57 @@
 <dict>
     <key>Label</key>
     <string>me.${USER}.screenshot_tagger</string>
+
     <key>Program</key>
     <string>${BIN_DIR}/${WATCHER_NAME}</string>
     <key>ThrottleInterval</key>
-    <integer>2</integer>
+    <integer>$THROTTLE_INTERVAL</integer>
+
     <key>WatchPaths</key>
     <array>
-        <string>${INPUT_DIR}</string>
+        <string>$INPUT_DIR</string>
     </array>
+
     <key>StandardOutPath</key>
-    <string>${LOG_FILE}</string>
+    <string>$LOG_FILE</string>
     <key>StandardErrorPath</key>
-    <string>${LOG_FILE}</string>
+    <string>$LOG_FILE</string>
+
     <key>ProcessType</key>
     <string>Interactive</string>
+
+    <key>LowPriorityIO</key>
+    <false/>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>LC_ALL</key>
+        <string>en_US.UTF-8</string>
+
+        <key>PATH</key>
+        <string>${BIN_DIR}:${HOMEBREW_PREFIX}/bin:${PATH}</string>
+        <key>TMPDIR</key>
+        <string>$TMPDIR</string>
+
+        <key>HOMEBREW_PREFIX</key>
+        <string>$HOMEBREW_PREFIX</string>
+        <key>BIN_DIR</key>
+        <string>$BIN_DIR</string>
+        <key>ARG_FILES_DIR</key>
+        <string>$ARG_FILES_DIR</string>
+
+        <key>INPUT_DIR</key>
+        <string>$INPUT_DIR</string>
+        <key>OUTPUT_DIR</key>
+        <string>$OUTPUT_DIR</string>
+
+        <key>LOCK_PATH</key>
+        <string>$LOCK_PATH</string>
+        <key>EXECUTION_DELAY</key>
+        <string>$EXECUTION_DELAY</string>
+
+        <key>HW_MODEL</key>
+        <string>$HW_MODEL</string>
+    </dict>
 </dict>
 </plist>

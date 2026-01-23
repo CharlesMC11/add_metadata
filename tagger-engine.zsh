@@ -45,9 +45,9 @@ _tagger-engine::error_if_not_dir () {
     if [[ ! -d $2 ]]; then
         print -u 2 -- "${SCRIPT_NAME}: $1 is not a directory: '$2'"
         _show_usage
-        return ${EX_NOINPUT:-66}
+        return 66 # BSD: Cannot open input
     fi
-    return ${EX_OK:-0}
+    return 0
 }
 
 ################################################################################
@@ -62,7 +62,7 @@ tagger-engine::main() {
 
     if (( ${+opts[--help]} )); then
         _tagger-engine::show_usage
-        return ${EX_OK:-0}
+        return 0
     fi
 
     readonly input_dir=${opts[--input]:-$PWD}
@@ -73,7 +73,7 @@ tagger-engine::main() {
 
     cd "$input_dir"
 
-    readonly model=${opts[--model]:-$(sysctl -n hw.model)}
+    readonly model=${opts[--model]:-${HW_MODEL:-$(sysctl -n hw.model)}}
     readonly software=${opts[--software]:-$(sw_vers --productVersion)}
     local timezone; strftime -s timezone %z
     readonly timezone=${opts[--timezone]:-$timezone}
@@ -85,7 +85,7 @@ tagger-engine::main() {
     )
     if (( ${#pending_screenshots} == 0 )); then
         print -u 2 -- "${SCRIPT_NAME}: No screenshots to process in '${input_dir}/'"
-        return ${EX_DATAERR:-65}
+        return 65 #BSD: Data format error
     fi
 
     local -Ua bg_pids
@@ -126,12 +126,12 @@ tagger-engine::main() {
 
     if ! wait $aa_pid; then
         print -l -u 2 -- "${SCRIPT_NAME}: Archiving failed" "$mapfile[aa.log]"
-        return ${EX_CANTCREAT:-70}
+        return 70 # BSD: Internal software error
     fi
 
     if ! wait $et_pid; then
         print -l -u 2 -- "${SCRIPT_NAME}: ExifTool failed" "$mapfile[et.log]"
-        return ${EX_SOFTWARE:-70}
+        return 70 # BSD: Internal software error
     fi
 
     rm -f "${pending_screenshots[@]}" *.log
@@ -139,7 +139,7 @@ tagger-engine::main() {
         print -- "${SCRIPT_NAME}: Created archive: '${output_dir:t}/${archive_name}'"
     fi
 
-    return ${EX_OK:-0}
+    return 0
 }
 
 if [[ $ZSH_EVAL_CONTEXT == toplevel ]]; then

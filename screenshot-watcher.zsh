@@ -12,29 +12,6 @@ zmodload zsh/files
 
 readonly SCRIPT_NAME=${0:t:r}
 
-readonly EXECUTABLE_DIR=${HOME}/.local/bin/screenshot-tagger
-readonly ARG_FILES_DIR=${HOME}/.local/share/exiftool
-
-if [[ -f ${EXECUTABLE_DIR}/config.zsh ]]; then
-    source "${EXECUTABLE_DIR}/config.zsh"
-else
-    print -u 2 -- 'Environment file not found; exiting...'
-    exit $EX_NOINPUT
-fi
-
-readonly LOCK_PATH="${TMPDIR}${SCRIPT_NAME}.lock"
-
-float -r EXECUTION_DELAY=0.1
-
-readonly HOMEBREW_PREFIX=/opt/homebrew
-
-export -Ua path
-path=(
-    "$EXECUTABLE_DIR"
-    "${HOMEBREW_PREFIX}/bin"
-    ${==path}
-)
-
 ################################################################################
 
 # Taking multiple screenshots in succession causes `launchd` to trigger the same
@@ -45,12 +22,12 @@ if mkdir -m 200 "$LOCK_PATH" 2>/dev/null; then
     print -- "Created lock in '${LOCK_PATH:h}/'"
 else
     print -u 2 -- "Lock exists in '${LOCK_PATH:h}/'; exiting..."
-    exit $EX_TEMPFAIL
+    exit 75 # BSD: EX_TEMPFAIL
 fi
 
 sleep $EXECUTION_DELAY # Give time for all screenshots to be written to disk
 
-source "${EXECUTABLE_DIR}/tagger-engine"
+source "${BIN_DIR}/tagger-engine"
 local engine_output
 engine_output=$(tagger-engine::main --verbose --input "$INPUT_DIR" --output "$OUTPUT_DIR"\
     -@ "${ARG_FILES_DIR}/charlesmc.args" -@ "${ARG_FILES_DIR}/screenshot.args"\

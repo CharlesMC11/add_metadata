@@ -1,28 +1,28 @@
-SHELL               := zsh
-SCRIPT_NAME         := screenshot-tagger
-export BIN_DIR      := $(HOME)/.local/bin/$(SCRIPT_NAME)
-export ARG_FILES_DIR:= $(HOME)/.local/share/exiftool
+SHELL                   := zsh
+SCRIPT_NAME             := screenshot-tagger
+export BIN_DIR          := $(HOME)/.local/bin/$(SCRIPT_NAME)
+export ARG_FILES_DIR    := $(HOME)/.local/share/exiftool
 
-ENGINE_NAME         := tagger-engine
-export WATCHER_NAME := screenshot-watcher
+ENGINE_NAME             := tagger-engine
+export WATCHER_NAME     := screenshot-watcher
 
-PLIST_NAME_BASE     := screenshot_tagger.plist
-PLIST_NAME_TEMPLATE := $(PLIST_NAME_BASE).template
-PLIST_NAME          := me.$(USER).$(PLIST_NAME_BASE)
+PLIST_NAME_BASE         := screenshot_tagger.plist
+PLIST_NAME_TEMPLATE     := $(PLIST_NAME_BASE).template
+PLIST_NAME              := me.$(USER).$(PLIST_NAME_BASE)
 
-export LOG_FILE     := $(HOME)/Library/Logs/me.$(USER).$(WATCHER_NAME).log
-export TMPDIR       := /Volumes/Workbench/
-export INPUT_DIR    := $(TMPDIR)$(SCRIPT_NAME)
-export OUTPUT_DIR   := $(HOME)/MyFiles/Pictures/Screenshots
+export LOG_FILE         := $(HOME)/Library/Logs/me.$(USER).$(WATCHER_NAME).log
+export TMPDIR           := /Volumes/Workbench/
+export INPUT_DIR        := $(TMPDIR)$(SCRIPT_NAME)
+export OUTPUT_DIR       := $(HOME)/MyFiles/Pictures/Screenshots
 
-export HW_MODEL     := $(shell system_profiler SPHardwareDataType | sed -En 's/^.*Model Name: //p')
+export HW_MODEL         := $$(system_profiler SPHardwareDataType | sed -En 's/^.*Model Name: //p')
 
-export EXECUTION_DELAY:=0.1
+export EXECUTION_DELAY  :=0.1
 export THROTTLE_INTERVAL:=2
 
-export LOCK_PATH    := $(TMPDIR)$(WATCHER_NAME).lock
+export LOCK_PATH        := $(TMPDIR)$(WATCHER_NAME).lock
 
-INSTALL             := install -v
+INSTALL                 := install -pv
 
 .PHONY: all install compile start stop uninstall clean
 

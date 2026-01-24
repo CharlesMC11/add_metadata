@@ -24,9 +24,9 @@ export LOCK_PATH        := $(TMPDIR)$(WATCHER_NAME).lock
 
 INSTALL                 := install -pv
 
-.PHONY: all install compile start stop uninstall clean
+.PHONY: all install start stop uninstall clean
 
-all: compile install start
+all: install start
 
 install: compile
 	@print -- "Installing to '$(BIN_DIR)'"

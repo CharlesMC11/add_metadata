@@ -1,5 +1,5 @@
 #!/opt/homebrew/bin/zsh -f
-# A script for renaming and adding metadata to screenshots
+# A script for adding certain metadata to screenshots, then renaming them.
 
 setopt ERR_EXIT
 setopt NO_UNSET

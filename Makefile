@@ -28,44 +28,28 @@ INSTALL                 := install -pv
 
 all: install start
 
-install: compile
-	@print -- "Installing to '$(BIN_DIR)'"
-	@if [[ -e $(BIN_DIR) && ! -d $(BIN_DIR) ]]; then\
-		rm $(BIN_DIR);\
-	fi
+install:
+	@{ [[ -e $(BIN_DIR) && ! -d $(BIN_DIR) ]] && rm $(BIN_DIR) } || true
 	@mkdir -p $(BIN_DIR)
 	@mkdir -p ~/Library/Logs
 
-	@$(INSTALL) -m 755 $(ENGINE_NAME).zsh      $(BIN_DIR)/$(ENGINE_NAME)
-	@$(INSTALL) -m 444 $(ENGINE_NAME).zsh.zwc  $(BIN_DIR)/$(ENGINE_NAME).zwc
+	@$(INSTALL) -m 755 $(ENGINE_NAME).zsh  $(BIN_DIR)/$(ENGINE_NAME)
+	@zcompile -U $(BIN_DIR)/$(ENGINE_NAME)
 
-	@$(INSTALL) -m 755 $(WATCHER_NAME).zsh     $(BIN_DIR)/$(WATCHER_NAME)
-	@$(INSTALL) -m 444 $(WATCHER_NAME).zsh.zwc $(BIN_DIR)/$(WATCHER_NAME).zwc
+	@$(INSTALL) -m 755 $(WATCHER_NAME).zsh $(BIN_DIR)/$(WATCHER_NAME)
+	@zcompile -U $(BIN_DIR)/$(WATCHER_NAME)
 
-compile: $(ENGINE_NAME).zwc $(WATCHER_NAME).zwc
+start: $(PLIST_NAME_TEMPLATE)
+	@content=$$(<$<); print -r -- "$${(e)content}" > $(PLIST_NAME)
+	@mv $(PLIST_NAME) ~/Library/LaunchAgents/
+	launchctl bootstrap gui/$$(id -u) $(PLIST_NAME)
 
-start: $(PLIST_NAME)
-	@$(INSTALL) -m 400 $(PLIST_NAME) ~/Library/LaunchAgents/
-	launchctl bootstrap gui/$(shell id -u) $(PLIST_NAME)
-
-$(PLIST_NAME): $(PLIST_NAME_TEMPLATE)
-	@zsh -fc 'content=$$(<$<); print -r -- "$${(e)content}"' > $@
-
-stop: $(PLIST_NAME)
-	-launchctl bootout gui/$(shell id -u) $(PLIST_NAME)
+stop:
+	-launchctl bootout gui/$$(id -u) $(PLIST_NAME)
 	-rm -f ~/Library/LaunchAgents/$(PLIST_NAME)
 
 uninstall: stop
-	@print -- "Uninstalling '$(BIN_DIR)'..."
 	rm -rf $(BIN_DIR)
-
-clean:
-	-rm -f *.zwc
-	-rm -f *.plist
-
-%.zwc: %.zsh
-	zsh -n $<
-	zcompile -U $<
 
 log:
 	open $(LOG_FILE)

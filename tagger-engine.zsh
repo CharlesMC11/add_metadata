@@ -46,8 +46,8 @@ _tagger-engine::show_usage () {
 _tagger-engine::error_if_not_dir () {
     if [[ ! -d $2 ]]; then
         print -u 2 -- "${SCRIPT_NAME}: $1 is not a directory: '$2'"
-        _show_usage
-        return 66 # BSD: Cannot open input
+        _tagger-engine::show_usage
+        return 65  # BSD EX_DATAERR
     fi
     return 0
 }
@@ -87,7 +87,7 @@ tagger-engine () {
     )
     if (( ${#pending_screenshots} == 0 )); then
         print -u 2 -- "${SCRIPT_NAME}: No screenshots to process in '${input_dir}/'"
-        return 65 #BSD: Data format error
+        return 66  #BSD EX_NOINPUT
     fi
 
     typeset -gUa bg_pids
@@ -130,12 +130,12 @@ tagger-engine () {
 
     if ! wait $aa_pid; then
         print -l -u 2 -- "${SCRIPT_NAME}: Archiving failed" "$mapfile[aa.log]"
-        return 70 # BSD: Internal software error
+        return 73  # BSD EX_CANTCREAT
     fi
 
     if ! wait $et_pid; then
         print -l -u 2 -- "${SCRIPT_NAME}: ExifTool failed" "$mapfile[et.log]"
-        return 70 # BSD: Internal software error
+        return 70  # BSD EX_SOFTWARE
     fi
 
     rm -f "${pending_screenshots[@]}"

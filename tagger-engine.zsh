@@ -16,14 +16,14 @@ zmodload zsh/files
 zmodload zsh/mapfile
 zmodload zsh/zutil
 
-readonly DATE_FILTER_RE='<1900-2199>-<1-12>-<1-31>'
-readonly TIME_FILTER_RE='<-24>.<-59>.<-59>'
-readonly FILENAME_FILTER_RE="Screenshot ${~DATE_FILTER_RE} at ${~TIME_FILTER_RE}"
-readonly FILENAME_SORTING_RE='*(.Om)'
+readonly DATE_GLOB='<1900-2199>-<01-12>-<01-31>'
+readonly TIME_GLOB='<00-23>.<00-59>.<00-59>'
+readonly FILENAME_GLOB="Screenshot ${~DATE_GLOB} at ${~TIME_GLOB}"
+readonly FILENAME_SORTING_GLOB='*(.Om)'
 
-readonly DATE_EXTRACTOR_RE='([1-2][^2-8])?(\d{2})\D?([0-1]\d)\D?([0-3]\d)'
-readonly TIME_EXTRACTOR_RE='([0-2]\d)\D?([0-5]\d)\D?([0-5]\d)'
-readonly DATETIME_EXTRACTOR_RE="^.*?${DATE_EXTRACTOR_RE}\D*?${TIME_EXTRACTOR_RE}(\D*?\d*?\D*?)\..+$"
+readonly DATE_RE='([1-2][^2-8])(\d{2})-([0-1]\d)-([0-3]\d)'
+readonly TIME_RE='([0-2]\d)\.([0-5]\d)\.([0-5]\d)'
+readonly DATETIME_RE="^Screenshot ${DATE_RE} at ${TIME_RE}(\D*?\d*?\D*?)\..+$"
 readonly FILENAME_REPLACEMENT_RE='$2$3$4_$5$6$7$8.%e'
 readonly DATETIME_REPLACEMENT_RE='$1$2-$3-$4T$5:$6:$7'
 
@@ -82,8 +82,8 @@ tagger-engine () {
 
     local -Ua pending_screenshots
     readonly pending_screenshots=( \
-        ${~FILENAME_FILTER_RE}.${~FILENAME_SORTING_RE} \
-        ${~FILENAME_FILTER_RE}*.${~FILENAME_SORTING_RE}
+        ${~FILENAME_GLOB}.${~FILENAME_SORTING_GLOB} \
+        ${~FILENAME_GLOB}*.${~FILENAME_SORTING_GLOB}
     )
     if (( ${#pending_screenshots} == 0 )); then
         print -u 2 -- "${SCRIPT_NAME}: No screenshots to process in '${input_dir}/'"
@@ -113,7 +113,7 @@ tagger-engine () {
     bg_pids+=($aa_pid)
 
     # PERL string replacement patterns that will be used by ExifTool
-    readonly replacement_pattern="Filename;s/${DATETIME_EXTRACTOR_RE}"
+    readonly replacement_pattern="Filename;s/${DATETIME_RE}"
     readonly new_filename_pattern="\${${replacement_pattern}/${FILENAME_REPLACEMENT_RE}/}"
     readonly new_datetime_pattern="\${${replacement_pattern}/${DATETIME_REPLACEMENT_RE}${timezone}/}"
 

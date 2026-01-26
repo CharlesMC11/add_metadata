@@ -9,15 +9,17 @@ export WATCHER_NAME     := screenshot-watcher
 PLIST_NAME_BASE         := screenshot_tagger.plist
 PLIST_NAME_TEMPLATE     := $(PLIST_NAME_BASE).template
 PLIST_NAME              := me.$(USER).$(PLIST_NAME_BASE)
+PLIST_PATH              := $(HOME)/Library/LaunchAgents/$(PLIST_NAME)
 
 export LOG_FILE         := $(HOME)/Library/Logs/me.$(USER).$(WATCHER_NAME).log
 export TMPDIR           := /Volumes/Workbench/
+export TMPPREFIX        := $(TMPDIR)zsh
 export INPUT_DIR        := $(TMPDIR)$(SCRIPT_NAME)
 export OUTPUT_DIR       := $(HOME)/MyFiles/Pictures/Screenshots
 
-export HW_MODEL         := $$(system_profiler SPHardwareDataType | sed -En 's/^.*Model Name: //p')
+export HW_MODEL         := $(shell system_profiler SPHardwareDataType | sed -En 's/^.*Model Name: //p')
 
-export EXECUTION_DELAY  :=0.1
+export EXECUTION_DELAY  :=0.5
 export THROTTLE_INTERVAL:=2
 
 export LOCK_PATH        := $(TMPDIR)$(WATCHER_NAME).lock
@@ -41,15 +43,18 @@ install:
 
 start: $(PLIST_NAME_TEMPLATE)
 	@content=$$(<$<); print -r -- "$${(e)content}" > $(PLIST_NAME)
-	@mv $(PLIST_NAME) ~/Library/LaunchAgents/
-	launchctl bootstrap gui/$$(id -u) $(PLIST_NAME)
+	@mv $(PLIST_NAME) $(PLIST_PATH)
+	launchctl bootstrap gui/$(shell id -u) $(PLIST_PATH)
 
 stop:
-	-launchctl bootout gui/$$(id -u) $(PLIST_NAME)
-	-rm -f ~/Library/LaunchAgents/$(PLIST_NAME)
+	-launchctl bootout gui/$(shell id -u) $(PLIST_PATH)
+	-rm -f $(PLIST_PATH)
 
 uninstall: stop
 	rm -rf $(BIN_DIR)
+
+status:
+	launchctl print gui/$(shell id -u) $(PLIST_PATH) | grep $(USER)
 
 log:
 	open $(LOG_FILE)

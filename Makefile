@@ -1,65 +1,71 @@
-SHELL                   := zsh
-SCRIPT_NAME             := screenshot-tagger
+export HOMEBREW_PREFIX  := $(shell brew --prefix)
+export SHELL            := $(HOMEBREW_PREFIX)/bin/zsh
+export SCRIPT_NAME      := screenshot-tagger
+
 export BIN_DIR          := $(HOME)/.local/bin/$(SCRIPT_NAME)
 export ARG_FILES_DIR    := $(HOME)/.local/share/exiftool
+LOG_DIR                 := $(HOME)/Library/Logs
+export LOG_FILE         := $(LOG_DIR)/me.$(USER).$(SCRIPT_NAME).log
 
 ENGINE_NAME             := tagger-engine
 export WATCHER_NAME     := screenshot-watcher
 
-PLIST_NAME_BASE         := screenshot_tagger.plist
-PLIST_NAME_TEMPLATE     := $(PLIST_NAME_BASE).template
-PLIST_NAME              := me.$(USER).$(PLIST_NAME_BASE)
+PLIST_BASE              := screenshot_tagger.plist
+PLIST_NAME              := me.$(USER).$(PLIST_BASE)
 PLIST_PATH              := $(HOME)/Library/LaunchAgents/$(PLIST_NAME)
 
-export LOG_FILE         := $(HOME)/Library/Logs/me.$(USER).$(WATCHER_NAME).log
-export TMPDIR           := /Volumes/Workbench/
-export TMPPREFIX        := $(TMPDIR)zsh
-export INPUT_DIR        := $(TMPDIR)$(SCRIPT_NAME)
+ROOT_DIR                := /Volumes/Workbench
+export TMPDIR           := $(ROOT_DIR)/$(SCRIPT_NAME)/tmp
+export TMPPREFIX        := $(TMPDIR)/zsh-
+export INPUT_DIR        := $(ROOT_DIR)/Screenshots
 export OUTPUT_DIR       := $(HOME)/MyFiles/Pictures/Screenshots
+export LOCK_PATH        := $(TMPDIR)/.lock
 
 export HW_MODEL         := $(shell system_profiler SPHardwareDataType | sed -En 's/^.*Model Name: //p')
 
-export EXECUTION_DELAY  :=0.5
-export THROTTLE_INTERVAL:=2
+export EXECUTION_DELAY  :=0.1
+export THROTTLE_INTERVAL:=1
 
-export LOCK_PATH        := $(TMPDIR)$(WATCHER_NAME).lock
+INSTALL                 := install -pv -m 755
 
-INSTALL                 := install -pv
+.PHONY: all install start stop uninstall reinstall clean
 
-.PHONY: all install start stop uninstall clean
+all: start
 
-all: install start
+install: $(BIN_DIR)/$(ENGINE_NAME) $(BIN_DIR)/$(WATCHER_NAME)
 
-restart: stop start
+$(BIN_DIR)/%: %.zsh | $(BIN_DIR) $(LOG_DIR) $(TMPDIR)
+	@$(INSTALL) $< $@
+	@zcompile -U $@
 
-install:
-	@{ [[ -e $(BIN_DIR) && ! -d $(BIN_DIR) ]] && rm $(BIN_DIR) } || true
-	@mkdir -p $(BIN_DIR)
-	@mkdir -p ~/Library/Logs
+$(BIN_DIR):
+	@if [[ -e $@ && ! -d $@ ]]; then \
+		rm $@; \
+	fi
+	@mkdir -p $@
 
-	@$(INSTALL) -m 755 $(ENGINE_NAME).zsh  $(BIN_DIR)/$(ENGINE_NAME)
-	@zcompile -U $(BIN_DIR)/$(ENGINE_NAME)
+start: $(PLIST_PATH) stop install
+	launchctl bootstrap gui/$(shell id -u) $<
 
-	@$(INSTALL) -m 755 $(WATCHER_NAME).zsh $(BIN_DIR)/$(WATCHER_NAME)
-	@zcompile -U $(BIN_DIR)/$(WATCHER_NAME)
-
-start: $(PLIST_NAME_TEMPLATE)
-	@content=$$(<$<); print -r -- "$${(e)content}" > $(PLIST_NAME)
-	@mv $(PLIST_NAME) $(PLIST_PATH)
-	launchctl bootstrap gui/$(shell id -u) $(PLIST_PATH)
+$(PLIST_PATH): $(PLIST_BASE).template
+	@content=$$(<$<); print -r -- "$${(e)content}" >| $@
 
 stop:
-	-launchctl bootout gui/$(shell id -u) $(PLIST_PATH)
-	-rm -f $(PLIST_PATH)
+	-launchctl bootout gui/$(shell id -u) $(PLIST_PATH) 2>/dev/null
+
+clean:
+	rm -f $(BIN_DIR)/*.zwc
+	rm -f $(TMPDIR)/*
 
 uninstall: stop
 	rm -rf $(BIN_DIR)
+	rm -f $(PLIST_PATH)
 
 status:
-	launchctl print gui/$(shell id -u) $(PLIST_PATH) | grep $(USER)
+	@launchctl list | grep $(USER) 2>/dev/null
 
-log:
-	open $(LOG_FILE)
+open-log:
+	@open $(LOG_FILE)
 
-delete-log:
-	rm $(LOG_FILE)
+clear-log:
+	@print -- >| $(LOG_FILE)

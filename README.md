@@ -4,13 +4,13 @@ A Zsh-based automation suite for macOS on Apple Silicon. It monitors a screensho
 
 ## Motivation
 
-This project was originally inspired to find a way for image cataloging tools such as **Lightroom Classic** and **Capture One** to treat screenshots of video calls with my girlfriend as photos taken with a camera. Eventually, this also evolved into a project for me to learn how to better use resources available on Apple Silicon and Zsh.
+This project was originally inspired by finding a way for image cataloging tools such as **Lightroom Classic** and **Capture One** to treat screenshots of video calls with my girlfriend as photos taken with a camera. Eventually, this also evolved into a project for me to learn how to better use resources available on Apple Silicon and Zsh.
 
 ## Performance Architecture
 
-- **Hardware-Accelerated Archiving**: Uses Apple Archive (`.aar`) with `lz4` compression to archive original files after processing.
-- **Atomic Execution**: Uses `zsystem flock` to safely handle mutiple screenshots taken in succession.
 - **Native Efficiency**: Compiled to `Zsh Word Code` (`.zwc`) and scheduled with `Interactive` priority.
+- **Atomic Execution**: Uses `zsystem flock` to safely handle mutiple screenshots taken in succession.
+- **Automatic Archiving**: Uses Apple Archive (`.aar`) with `lz4` compression to archive original files after processing.
 
 ## Features
 
@@ -24,10 +24,10 @@ This project was originally inspired to find a way for image cataloging tools su
 
 ## Project Structure
 
+- `Makefile`: For compiling the scripts and building the `.plist`, using Environment Variables as configurations.
 - `tagger-engine.zsh`: The core logic for tagging, renaming, and archiving.
 - `screenshot-watcher.zsh`: A wrapper script called by `launchd` that manages execution locks and calls the engine.
 - `screenshot_tagger.plist.template`: A launch agent template to automate the script via macOS `WatchPaths`.
-- `Makefile`: For compiling the scripts and building the `.plist`, using Environment Variables as configurations.
 
 ## Installation
 

@@ -39,6 +39,7 @@ else
   sound=Basso
 fi
 
+print -- "${=msg}"
 osascript <<EOF
   display notification "${msg#*: }" \
   with title "Screenshot Tagger" \

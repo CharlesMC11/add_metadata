@@ -30,7 +30,7 @@ readonly DATETIME_REPLACEMENT_RE='$1$2-$3-$4T$5:$6:$7'
 readonly SST_NAME=sst
 
 # Show the options menu.
-_sst::help () {
+_sst::help() {
   print -l -- "usage: ${SST_NAME}" "\t-v --verbose" "\t-h --help" \
   "\t-i --input    (default = current directory)" \
   "\t-o --output   (default = current directory)" \
@@ -42,7 +42,7 @@ _sst::help () {
 
 # Print a log message
 # $1: The log level: DEBUG | INFO | WARN | ERROR | CRITICAL
-_sst::log () {
+_sst::log() {
   readonly level=${(U)1}
   shift
   local datetime; strftime -s datetime '%Y-%m-%d %H:%M:%S'
@@ -56,7 +56,7 @@ _sst::log () {
 # Print an error message, then return a status code.
 # $1: The error code to return.
 # $2: The error messages to print.
-_sst::err () {
+_sst::err() {
   integer -r status_code=$1
   shift
 
@@ -68,7 +68,7 @@ _sst::err () {
 # Return an error code if the given is not a directory.
 # $1: "Input" or "Output"
 # $2: An input or output directory
-_sst::is_directory () {
+_sst::is_directory() {
   if [[ -d $2 ]]; then
     return 0
   fi
@@ -78,7 +78,7 @@ _sst::is_directory () {
 
 ################################################################################
 
-sst () {
+sst() {
   local -a arg_files
   local -AU opts
   zparseopts -D -E -M -A opts h=-help -help v=-verbose -verbose \

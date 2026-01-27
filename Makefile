@@ -46,61 +46,64 @@ all: start
 
 check-ram-disk:
 # return 78: BSD EX_CONFIG
-	@if [[ ! -d $(ROOT_DIR) ]]; then \
-		print -- '$(ROOT_DIR) is not loaded'; \
+	@if [[ ! -d "$(ROOT_DIR)" ]]; then \
+		print -- '"$(ROOT_DIR)" is not loaded'; \
 		exit 78; \
 	fi
 
 $(TMPDIR) $(INPUT_DIR) $(LOG_DIR):
-	mkdir -p $@
+	mkdir -p "$@"
 
 $(BIN_DIR)/.dirstamp:
-	@if [[ -e $(BIN_DIR) && ! -d $(BIN_DIR) ]]; then \
-		rm $(BIN_DIR); \
+	@if [[ -e "$(BIN_DIR)" && ! -d "$(BIN_DIR)" ]]; then \
+		rm "$(BIN_DIR)"; \
 	fi
-	@mkdir -p $(BIN_DIR) && touch $@
+	@mkdir -p "$(BIN_DIR)" && touch "$@"
 
 $(BIN_DIR)/%: %.zsh $(CONFIGS) | $(BIN_DIR)/.dirstamp
-	@$(INSTALL) $< $@
-	@zcompile -U $@
+	@$(INSTALL) "$<" "$@"
+	@zcompile -U "$@"
 
 $(PLIST_PATH): $(PLIST_BASE).template Makefile
-	@content=$$(<$<); print -r -- "$${(e)content}" >| $@
+	@content="$$(<$<)"; print -r -- "$${(e)content}" >| "$@"
 
 $(UNINSTALLER): $(CONFIGS) | $(BIN_DIR)/.dirstamp
 	@print -l -- \
-		'#!/bin/sh' \
-		'launchctl bootout gui/$(shell id -u) $(PLIST_PATH) 2>/dev/null' \
-		'rm -rf $(BIN_DIR)' \
-		'rm -f $(PLIST_PATH)' > $@
-	@chmod 755 $@
+		'#!/usr/bin/env sh' \
+		'launchctl bootout gui/$(shell id -u) "$(PLIST_PATH)"' \
+		'rm -f "$(PLIST_PATH)"' \
+		'rm -rf "$(BIN_DIR)"' \
+		'defaults delete $(SCREENCAPTURE_PREF)' \
+		'killall SystemUIServer' > "$@"
+	@chmod 755 "$@"
 
 install: check-ram-disk $(BIN_DIR)/$(ENGINE_NAME) $(BIN_DIR)/$(WATCHER_NAME) \
 	$(UNINSTALLER) | $(TMPDIR) $(INPUT_DIR) $(LOG_DIR)
 
-start: $(PLIST_PATH) stop install
-	launchctl bootstrap gui/$(shell id -u) $<
-	defaults write $(SCREENCAPTURE_PREF) -string '$(INPUT_DIR)'
+start: $(PLIST_PATH) install
+	@launchctl bootout gui/$(shell id -u) "$(PLIST_PATH)" 2>/dev/null || true
+	launchctl bootstrap gui/$(shell id -u) "$<"
+	defaults write $(SCREENCAPTURE_PREF) -string "$(INPUT_DIR)"
 	@killall SystemUIServer
 
 stop:
-	-launchctl bootout gui/$(shell id -u) $(PLIST_PATH) 2>/dev/null
+	-launchctl bootout gui/$(shell id -u) "$(PLIST_PATH)" 2>/dev/null
 	-defaults delete $(SCREENCAPTURE_PREF) 2>/dev/null
 	@killall SystemUIServer
 
 uninstall: stop
-	rm -rf $(BIN_DIR)
-	rm -f $(PLIST_PATH)
+	rm -f "$(PLIST_PATH)"
+	rm -rf "$(BIN_DIR)"
 
 clean:
-	rm -f $(BIN_DIR)/*.zwc
-	rm -f $(TMPDIR)/*
+	rm -f "$(BIN_DIR)"/*.zwc
+	rm -f "$(TMPDIR)"/*
 
 status:
-	@launchctl list | grep $(USER)
+	@launchctl list | grep "$(USER)"
 
 open-log:
-	@open $(LOG_FILE)
+	@open "$(LOG_FILE)"
 
 clean-log:
-	@print -- >| $(LOG_FILE)
+	@print -- >| "$(LOG_FILE)"

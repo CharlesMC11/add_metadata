@@ -8,10 +8,25 @@ setopt WARN_CREATE_GLOBAL
 setopt NO_NOTIFY
 setopt NO_BEEP
 
+zmodload zsh/datetime
 zmodload zsh/files
+zmodload zsh/parameter
 zmodload zsh/system
 
-source "${BIN_DIR}/sst"
+_sstd::err() {
+  print -u 2 -- "[$1] [FATAL] ${0:t:r}: $2"
+  exit 72  # BSD EX_OSFILE
+}
+
+if ! source "${BIN_DIR}/sst"; then
+  local datetime; strftime -s datetime '%Y-%m-%d %H:%M:%S'
+  _sstd::err $datetime "Could not source '${BIN_DIR}/sst'."
+fi
+
+if [[ -z $functions[_sst::log] ]]; then
+  strftime -s datetime '%Y-%m-%d %H:%M:%S'
+  _sstd::err $datetime "\`sst\` loaded, \`_sst:log\` is missing."
+fi
 
 ################################################################################
 

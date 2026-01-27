@@ -1,4 +1,4 @@
-# Screenshot Tagger
+# sst (Screenshot Tagger)
 
 A Zsh-based automation suite for macOS on Apple Silicon. It monitors a screenshot directory, renames files based on capture timestamps, and injects photography metadata.
 
@@ -25,15 +25,15 @@ This project was originally inspired by finding a way for image cataloging tools
 ## Project Structure
 
 - `Makefile`: For compiling the scripts and building the `.plist`, using Environment Variables as configurations.
-- `tagger-engine.zsh`: The core logic for tagging, renaming, and archiving.
-- `screenshot-watcher.zsh`: A wrapper script called by `launchd` that manages execution locks and calls the engine.
-- `screenshot_tagger.plist.template`: A launch agent template to automate the script via macOS `WatchPaths`.
+- `sst.zsh`: The core logic for tagging, renaming, and archiving.
+- `sstd.zsh`: A wrapper script called by `launchd` that manages execution locks and calls the engine.
+- `template.plist`: A launch agent template to automate the script via macOS `WatchPaths`.
 
 ## Installation
 
 The project includes a `Makefile` for streamlined setup:
 
 ```zsh
-make install  # Compiles scripts and moves them into `~/.local/bin`
+make install  # Compiles scripts and moves them into `$(BIN_DIR)$`
 make start    # Generates the `.plist` and launches the agent
 ```

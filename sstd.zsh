@@ -1,5 +1,5 @@
 #!/opt/homebrew/bin/zsh -f
-# A script for preparing `tagger-engine`. It will be called by `launchd`
+# A script for preparing `sst`. It will be called by `launchd`
 
 setopt CHASE_LINKS
 setopt ERR_EXIT
@@ -11,7 +11,7 @@ setopt NO_BEEP
 zmodload zsh/files
 zmodload zsh/system
 
-source "${BIN_DIR}/tagger-engine"
+source "${BIN_DIR}/sst"
 
 ################################################################################
 
@@ -19,15 +19,15 @@ integer fd
 exec {fd}>|"${LOCK_PATH}" && trap 'exec {fd}>&-' EXIT
 
 if zsystem flock -t 0 -f $fd "${LOCK_PATH}"; then
-  _tagger-engine::log INFO "Lock created in '${LOCK_PATH:h}/'; starting..."
+  _sst::log INFO "Lock created in '${LOCK_PATH:h}/'; starting..."
 else
   # return 75: BSD EX_TEMPFAIL
-  _tagger-engine::err 75 "Lock exists in '${LOCK_PATH:h}/'; exiting..."
+  _sst::err 75 "Lock exists in '${LOCK_PATH:h}/'; exiting..."
 fi
 
 sleep $EXECUTION_DELAY  # Give time for all screenshots to be written to disk
 
-msg=$(tagger-engine --verbose --input "$INPUT_DIR" --output "$OUTPUT_DIR" --model "${HW_MODEL}" \
+msg=$(sst --verbose --input "$INPUT_DIR" --output "$OUTPUT_DIR" --model "${HW_MODEL}" \
   -@ "${ARG_FILES_DIR}/charlesmc.args" -@ "${ARG_FILES_DIR}/screenshot.args")
 
 integer -r status_code=$?

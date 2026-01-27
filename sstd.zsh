@@ -107,7 +107,8 @@ sst() {
     ${~FILENAME_GLOB}.${~FILENAME_SORTING_GLOB} \
     ${~FILENAME_GLOB}*.${~FILENAME_SORTING_GLOB}
   )
-  if (( #pending_screenshots == 0 )); then
+  integer -r num_screenshots=${#pending_screenshots}
+  if (( num_screenshots == 0 )); then
     # return 66: BSD EX_NOINPUT
     _sst::err 66 "No screenshots to process in '${input_dir}/'"
   fi
@@ -164,7 +165,11 @@ sst() {
   }
 
   if (( ${+opts[--verbose]} )); then
-    _sst::log INFO "Processed ${#pending_screenshots} screenshot(s)." \
+    local unit=screenshot
+    if (( num_screenshots > 1 )); then
+      unit+=s
+    fi
+    _sst::log INFO "Processed ${num_screenshots} ${unit}." \
       "'${input_dir:t2}/' → '${output_dir:t2}/'"
   fi
 

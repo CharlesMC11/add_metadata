@@ -44,17 +44,6 @@ _sst::err() {
   return $status_code
 }
 
-# Return an error code if the given is not a directory.
-# $1: "Input" or "Output"
-# $2: An input or output directory
-_sst::is_directory() {
-  if [[ -d $2 ]]; then
-    return 0
-  fi
-  # return 65: BSD EX_DATAERR
-  _sst::err 65 "$1 is not a directory: '$2'"
-}
-
 sst() {
   local -a arg_files
   local -AU opts
@@ -77,8 +66,11 @@ sst() {
   readonly input_dir=${opts[--input]:-$PWD}
   readonly output_dir=${opts[--output]:-$PWD}
 
-  _sst::is_directory Input "$input_dir"
-  _sst::is_directory Output "$output_dir"
+  _sst::log DEBUG 'Checking if directories are valid...'
+  # return 65: BSD EX_DATAERR
+  [[ -d $input_dir ]] || { _sst::err 65 "Input is not a directory: '${input_dir}'" }
+  [[ -d $output_dir ]] || { _sst::err 65 "Output is not a directory: '${output_dir}'" }
+  _sst::log DEBUG 'Validated.'
 
   cd "$input_dir"
 

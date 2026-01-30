@@ -20,16 +20,10 @@ readonly DATETIME_RE="^Screenshot ${DATE_RE} at ${TIME_RE}(\D*?\d*?\D*?)\..+$"
 readonly FILENAME_REPLACEMENT_RE='$2$3$4_$5$6$7$8.%e'
 readonly DATETIME_REPLACEMENT_RE='$1$2-$3-$4T$5:$6:$7'
 
-# Show the options menu.
-_sst::help() {
-  print -l -- "usage: ${SCRIPT_NAME}" "\t-v --verbose" "\t-h --help" \
-  "\t-i --input    (default = current directory)" \
-  "\t-o --output   (default = current directory)" \
-  "\t-z --timezone (default = system timezone)" \
-  "\t-s --software (default = system software)" \
-  "\t-m --model    (default = system hardware)" \
-  "\t-@ --argfile  arg files"
-}
+readonly SCREENSHOTS_LIST="${TMPDIR:A}/files.txt"
+readonly LOCK_PATH="${TMPDIR:A}/${SCRIPT_NAME}.lock"
+
+float -r EXECUTION_DELAY=0.2
 
 # Print a log message
 # $1: The log level: DEBUG | INFO | WARN | ERROR | CRITICAL
@@ -76,7 +70,13 @@ sst() {
     z:=-timezone -timezone:    @+:=arg_files -argfile+:=arg_files
 
   if (( ${+opts[--help]} )); then
-    _sst::help
+    print -l -- "usage: ${SCRIPT_NAME}" "\t-v --verbose" "\t-h --help" \
+    "\t-i --input    (default = current directory)" \
+    "\t-o --output   (default = current directory)" \
+    "\t-z --timezone (default = system timezone)" \
+    "\t-s --software (default = system software)" \
+    "\t-m --model    (default = system hardware)" \
+    "\t-@ --argfile  arg files"
     return 0
   fi
 

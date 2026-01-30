@@ -1,25 +1,11 @@
 #!/opt/homebrew/bin/zsh -f
 # A script for adding certain metadata to screenshots, then renaming them.
 
-setopt ERR_EXIT
-setopt NO_UNSET
-setopt PIPE_FAIL
-setopt CHASE_LINKS
-setopt WARN_CREATE_GLOBAL
+setopt CHASE_LINKS ERR_EXIT NO_UNSET WARN_CREATE_GLOBAL
+setopt NO_BEEP NO_NOTIFY
+setopt EXTENDED_GLOB NULL_GLOB NUMERIC_GLOB_SORT
 
-setopt NO_NOTIFY
-setopt NO_BEEP
-
-setopt EXTENDED_GLOB
-setopt NULL_GLOB
-setopt NUMERIC_GLOB_SORT
-
-zmodload zsh/datetime
-zmodload zsh/files
-zmodload zsh/parameter
-zmodload zsh/mapfile
-zmodload zsh/system
-zmodload zsh/zutil
+zmodload zsh/datetime zsh/files zsh/parameter zsh/mapfile zsh/system zsh/zutil
 
 readonly SCRIPT_NAME=${0:t:r}
 

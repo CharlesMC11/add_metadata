@@ -4,15 +4,17 @@ A Zsh-based automation suite optimized for Apple Silicon. It leverages a RAM-dis
 
 ## Motivation
 
-This project was originally inspired by finding a way for image cataloging tools such as **Lightroom Classic** and **Capture One** to treat screenshots of video calls with my girlfriend as legitimate photos taken with a camera. Eventually, this also evolved into a project for me to explore macOS-native performance: utilizing RAM disks for transient files, `Zsh Word Code` for execution speed, and `launchd` for automation.
+This project was originally inspired by finding a way for image cataloging tools such as **Lightroom Classic** and **Capture One** to treat screenshots of video calls with my girlfriend as legitimate photos taken with a camera.
+
+Eventually, this also evolved into a project for me to explore macOS-native performance: utilizing RAM disks for transient files, `Zsh Word Code` for execution speed, and `launchd` for automation.
 
 ## Architecture & Performance
 
 Designed specifically for my M2 Max MacBook Pro with 96 GB RAM, the suite utilizes:
 
 - **RAM Disk Pipeline**: Uses a 16 GiB RAM disk (`/Volumes/Workbench`) for high-frequency transient data (locking, temporary logging, and process files) to reduce SSD wear.
-- **Native Efficiency**: Scripts are compiled to `Zsh Word Code` (`.zwc`) during installation.
-- **Atomic Execution**: Uses `zsystem flock` to prevent race conditions when mutiple screenshots taken in succession.
+- **Native Efficiency**: Compiles scripts to `Zsh Word Code` (`.zwc`) during installation.
+- **Atomic Execution**: Uses `zsystem flock` to prevent race conditions when mutiple screenshots are taken in succession.
 - **Apple Archive (`.aar`)**: Utilizes native Apple Silicon compression (`lz4`) to archive original files after processing.
 - **Strict Execution**: Uses `setopt NO_UNSET` and `ERR_EXIT` to ensure daemon fails safely and loudly if the environment is misconfigured.
 

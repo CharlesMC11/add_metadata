@@ -1,39 +1,53 @@
 # sst (Screenshot Tagger)
 
-A Zsh-based automation suite for macOS on Apple Silicon. It monitors a screenshot directory, renames files based on capture timestamps, and injects photography metadata.
+A Zsh-based automation suite optimized for Apple Silicon. It leverages a RAM-disk–to–SSD pipeline, injects professional photography metadata to screenshots, and archives the originals using Apple Archive.
 
 ## Motivation
 
-This project was originally inspired by finding a way for image cataloging tools such as **Lightroom Classic** and **Capture One** to treat screenshots of video calls with my girlfriend as photos taken with a camera. Eventually, this also evolved into a project for me to learn how to better use resources available on Apple Silicon and Zsh.
+This project was originally inspired by finding a way for image cataloging tools such as **Lightroom Classic** and **Capture One** to treat screenshots of video calls with my girlfriend as legitimate photos taken with a camera. Eventually, this also evolved into a project for me to explore macOS-native performance: utilizing RAM disks for transient files, `Zsh Word Code` for execution speed, and `launchd` for automation.
 
-## Performance Architecture
+## Architecture & Performance
 
-- **Native Efficiency**: Compiled to `Zsh Word Code` (`.zwc`) and scheduled with `Interactive` priority.
-- **Atomic Execution**: Uses `zsystem flock` to safely handle mutiple screenshots taken in succession.
-- **Automatic Archiving**: Uses Apple Archive (`.aar`) with `lz4` compression to archive original files after processing.
+Designed specifically for my M2 Max MacBook Pro with 96 GB RAM, the suite utilizes:
+
+- **RAM Disk Pipeline**: Uses a 16 GiB RAM disk (`/Volumes/Workbench`) for high-frequency transient data (locking, temporary logging, and process files) to reduce SSD wear.
+- **Native Efficiency**: Scripts are compiled to `Zsh Word Code` (`.zwc`) during installation.
+- **Atomic Execution**: Uses `zsystem flock` to prevent race conditions when mutiple screenshots taken in succession.
+- **Apple Archive (`.aar`)**: Utilizes native Apple Silicon compression (`lz4`) to archive original files after processing.
+- **Strict Execution**: Uses `setopt NO_UNSET` and `ERR_EXIT` to ensure daemon fails safely and loudly if the environment is misconfigured.
 
 ## Features
 
-- **Photography Workflow**: Injects `Model`, `Software`, and `DateTime` tags so screenshots are treated as camera imports.
-- **Smart Renaming**: Standardizes filenames to `YYMMDD_HHMMSS` based on the original capture time.
-- **Native Notifications**: Real-time updates through macOS Notifications Center using `osascript`.
-
-## Requirements
-
-- `ExifTool`: Required for metadata manipulation.
+- **Photography Metadata**: Injects `Model`, `Software`, `DateTime`, and `OffsetTime` tags via `ExifTool`.
+- **Professional Naming**: Standardizes filenames to `YYMMDD_HHMMSS` based on internal capture timestamp.
+- **Background Parallelism**: Dispatches `aa` and `exiftool` as background processes to minimize blocking time of the main daemon loop.
+- **Native Notifications**: Real-time status updates via macOS Notifications Center.
 
 ## Project Structure
 
-- `Makefile`: For compiling the scripts and building the `.plist`, using Environment Variables as configurations.
-- `sst.zsh`: The core logic for tagging, renaming, and archiving.
-- `sstd.zsh`: A wrapper script called by `launchd` that manages execution locks and calls the engine.
-- `sst.plist.template`: A launch agent template to automate the script via macOS `WatchPaths`.
+- `Makefile`: The build system. "Bakes" configuration constants directly into scripts to satisfy strict shell parameters.
+- `sstd.zsh`: The core daemon. Handles the lifecycle of the screenshot processing.
+- `functions/`: Autoloaded Zsh functions for modular logging, error-handling, and cleanup.
+- `sst.plist.template`: Generates the launch agent that monitors `$INPUT_DIR`.
 
 ## Installation
 
-The project includes a `Makefile` for streamlined setup:
+The suite is installed to the RAM disk, and registered as a user-level Launch Agent.
+
+1. **Configure**: Update the paths in the `Makefile` (defaults to `/Volumes/Workbench/sst`).
+2. **Build & Install**:
 
 ```zsh
 make install  # Compiles scripts and moves them into `$(BIN_DIR)`
+```
+
+3. **Start the Agent**:
+
+```zsh
 make start    # Generates the `.plist` and launches the agent
 ```
+
+## Requirements
+
+- **ExifTool**: Required for professional metadata injection.
+- **macOS**: Optimized for Apple Silicon.

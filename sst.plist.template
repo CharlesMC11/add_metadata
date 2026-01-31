@@ -13,28 +13,12 @@
         <string>en_US.UTF-8</string>
 
         <key>PATH</key>
-        <string>${HOMEBREW_PREFIX}/bin:/usr/bin:/bin:${BIN_DIR}</string>
+        <string>${HOMEBREW_PREFIX}/bin:/usr/bin:/bin</string>
+        <key>FPATH</key>
+        <string>${FUNC_DIR}</string>
 
-        <key>BIN_DIR</key>
-        <string>$BIN_DIR</string>
-        <key>INPUT_DIR</key>
-        <string>$INPUT_DIR</string>
-        <key>OUTPUT_DIR</key>
-        <string>$OUTPUT_DIR</string>
-
-        <key>TMPDIR</key>
-        <string>$TMPDIR</string>
-        <key>TMPPREFIX</key>
-        <string>$TMPPREFIX</string>
-        <key>LOCK_PATH</key>
-        <string>$LOCK_PATH</string>
         <key>ARG_FILES_DIR</key>
         <string>$ARG_FILES_DIR</string>
-
-        <key>HW_MODEL</key>
-        <string>$HW_MODEL</string>
-        <key>EXECUTION_DELAY</key>
-        <string>$EXECUTION_DELAY</string>
     </dict>
     <key>ThrottleInterval</key>
     <integer>$THROTTLE_INTERVAL</integer>
@@ -43,11 +27,6 @@
     <array>
         <string>$INPUT_DIR</string>
     </array>
-
-    <key>StandardOutPath</key>
-    <string>$LOG_FILE</string>
-    <key>StandardErrorPath</key>
-    <string>$LOG_FILE</string>
 
     <key>ProcessType</key>
     <string>Interactive</string>

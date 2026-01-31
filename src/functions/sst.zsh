@@ -43,9 +43,9 @@ sst() {
   {
     sst-log DEBUG 'Waiting for background tasks to finish...'
     # return 73: BSD EX_CANTCREAT
-    wait $aa_pid || sst-err 73 'aa:' "${(j: ⏎ :)${(f)mapfile[$AA_LOG]}}"
+    wait $aa_pid || sst-err 73 "Apple Archive Failed: ${(j: ⏎ :)${(f)mapfile[$AA_LOG]}}"
     # return 70: BSD EX_SOFTWARE
-    wait $et_pid || sst-err 70 'exiftool:' "${(j: ⏎ :)${(f)mapfile[$EXIFTOOL_LOG]}}"
+    wait $et_pid || sst-err 70 "ExifTool Failed: ${(j: ⏎ :)${(f)mapfile[$EXIFTOOL_LOG]}}"
   } always {
     integer -r status_code=$?
 

@@ -1,7 +1,6 @@
 sst() {
   cd "$INPUT_DIR"
 
-  sst-log DEBUG 'Gathering filenames...'
   local -Ua pending_screenshots
   readonly pending_screenshots=( *.png(nOm.N) )
   integer -r num_pending=${#pending_screenshots}
@@ -14,7 +13,7 @@ sst() {
     unit+=s
   fi
   sst-log INFO "Processing ${num_pending} ${unit}..."
-  print -l -- "${(@)pending_screenshots}" >|"$SCREENSHOTS_LIST"
+  print -l -- "${(@)pending_screenshots}" >|"$PENDING_LIST"
 
   local -Ua bg_pids
 
@@ -24,12 +23,12 @@ sst() {
   local aa_cmd=archive
   [[ -f $archive_name ]] && aa_cmd=append
 
-  sst-log INFO 'Archiving original files...'
+  sst-log INFO 'Archiving original files in the background...'
   aa $aa_cmd -v -a lz4 -d "$INPUT_DIR" -o "${OUTPUT_DIR}/${archive_name}"\
-    -include-path-list "$SCREENSHOTS_LIST" &>|"$AA_LOG" &
+    -include-path-list "$PENDING_LIST" &>|"$AA_LOG" &
   integer -r aa_pid=$!; bg_pids+=($aa_pid)
 
-  sst-log INFO 'Injecting metadata with `ExifTool`...'
+  sst-log INFO 'Injecting metadata in the background...'
   exiftool -o "${OUTPUT_DIR}/${current_month}/" -struct -preserve -verbose \
     '-RawFileName<FileName'             '-PreservedFileName<FileName' \
     '-MaxAvailHeight<ImageHeight'       '-MaxAvailWidth<ImageWidth' \
@@ -42,7 +41,7 @@ sst() {
   integer -r et_pid=$!; bg_pids+=($et_pid)
 
   {
-    sst-log DEBUG 'Waiting for archiving and metadata injection to finish...'
+    sst-log DEBUG 'Waiting for background tasks to finish...'
     # return 73: BSD EX_CANTCREAT
     wait $aa_pid || sst-err 73 'aa:' "${(j: ⏎ :)${(f)mapfile[$AA_LOG]}}"
     # return 70: BSD EX_SOFTWARE
@@ -51,17 +50,12 @@ sst() {
     integer -r status_code=$?
 
     if (( status_code == 0 )); then
-      sst-log INFO 'Tasks successful. Cleaning up...'
+      sst-log INFO 'Archiving and tagging successful'
 
       rm -f -- "${(@)pending_screenshots}"
+      : >!"$PENDING_LIST" >!"$AA_LOG" >!"$EXIFTOOL_LOG"
 
-      sst-log INFO "Processed ${num_pending} ${unit}." "'${INPUT_DIR:A}/' → '${OUTPUT_DIR:A}/'"
-
-      exec {log_fd}>&-
-      print -- "$mapfile[$LOG_FILE]"
-
-      : >!$SCREENSHOTS_LIST >!$AA_LOG >!$EXIFTOOL_LOG
-
+      sst-log INFO "Processed ${num_pending} ${unit}"
     elif (( status_code > 0 )); then
       kill ${(@)bg_pids} 2>/dev/null
       return $status_code

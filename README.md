@@ -46,7 +46,7 @@ make install  # Compiles scripts and moves them into `$(BIN_DIR)`
 3. **Start the Agent**:
 
 ```zsh
-make start    # Generates the `.plist` and launches the agent
+make start  # Generates the `.plist` and launches the agent
 ```
 
 ## Requirements

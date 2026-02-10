@@ -5,6 +5,5 @@ _sst_on_exit() {
 
   if [[ -s $LOG_FILE ]]; then
     print -- "$mapfile[$LOG_FILE]" >>! "$SYSTEM_LOG"
-    : >!"$LOG_FILE"
   fi
 }

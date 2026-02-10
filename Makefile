@@ -25,8 +25,9 @@ OUTPUT_DIR				:= $(HOME)/MyFiles/Pictures/Screenshots
 # Transient Paths
 TMPDIR					:= $(BIN_DIR)/tmp
 LOCK_PATH				:= $(TMPDIR)/$(SERVICE_NAME).lock
-export ARG_FILES_DIR	:= $(HOME)/.local/share/exiftool
-PENDING_LIST			:= $(TMPDIR)/pending.txt
+ARG_FILES_DIR			:= $(HOME)/.local/share/exiftool
+PENDING_LIST			:= $(TMPDIR)/pending.fifo
+PROCESSED_LIST			:= $(TMPDIR)/processed.txt
 LOG_FILE				:= $(TMPDIR)/$(SERVICE_NAME).log
 AA_LOG					:= $(TMPDIR)/aa.log
 EXIFTOOL_LOG			:= $(TMPDIR)/exiftool.log
@@ -62,7 +63,9 @@ SED_REPLACE				:= -e 's|@@ZSH@@|$(ZSH)|g' \
 							-e 's|@@INPUT_DIR@@|$(INPUT_DIR)|g' \
 							-e 's|@@OUTPUT_DIR@@|$(OUTPUT_DIR)|g' \
 							-e 's|@@LOCK_PATH@@|$(LOCK_PATH)|g' \
+							-e 's|@@ARG_FILES_DIR@@|$(ARG_FILES_DIR)|g' \
 							-e 's|@@PENDING_LIST@@|$(PENDING_LIST)|g' \
+							-e 's|@@PROCESSED_LIST@@|$(PROCESSED_LIST)|g' \
 							-e 's|@@LOG_FILE@@|$(LOG_FILE)|g' \
 							-e 's|@@AA_LOG@@|$(AA_LOG)|g' \
 							-e 's|@@EXIFTOOL_LOG@@|$(EXIFTOOL_LOG)|g' \

@@ -11,9 +11,6 @@
     <dict>
         <key>LC_ALL</key>
         <string>en_US.UTF-8</string>
-
-        <key>ARG_FILES_DIR</key>
-        <string>$ARG_FILES_DIR</string>
     </dict>
     <key>ThrottleInterval</key>
     <integer>$THROTTLE_INTERVAL</integer>

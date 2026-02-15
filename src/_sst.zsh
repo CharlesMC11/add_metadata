@@ -1,8 +1,8 @@
 _sst() {
   : >!"$LOG_FILE" >!"$PROCESSED_LIST" >!"$EXIFTOOL_LOG" >!"$AA_LOG"
 
-  local -Ua pending_screenshots
-  pending_screenshots=( "${(f)$(cat -)}" )
+  local buf; sysread buf
+  local -Ua pending_screenshots; pending_screenshots=( "${(@)${(f)buf}}" )
   integer -r pending_count=${#pending_screenshots}
 
   if (( pending_count == 0 )); then
